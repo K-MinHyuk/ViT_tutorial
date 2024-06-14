@@ -12,15 +12,15 @@
 
 
 # Todo
-[x] ViT_tutorial.ipynb
-[x] einops_tutorial.ipynb
-[] Image_Embedding.ipynb
-[] Transformer_Encoder.ipynb
-[] Multi_Head_Attention.ipynb
-[] Residual_Connection.ipynb
-[] MLP_Head.ipynb
-[] ViT.ipynb
-[] ViT.py
+- [x] ViT_tutorial.ipynb
+- [x] einops_tutorial.ipynb
+- [ ] Image_Embedding.ipynb
+- [ ] Transformer_Encoder.ipynb
+- [ ] Multi_Head_Attention.ipynb
+- [ ] Residual_Connection.ipynb
+- [ ] MLP_Head.ipynb
+- [ ] ViT.ipynb
+- [ ] ViT.py
 
 
 
