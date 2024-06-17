@@ -12,6 +12,7 @@
 
 
 # Todo
+- [x] fix branch issue 
 - [x] ViT_tutorial.ipynb
 - [x] einops_tutorial.ipynb
 - [x] Image_Embedding.ipynb
