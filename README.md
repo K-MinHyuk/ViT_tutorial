@@ -3,11 +3,10 @@
 - 00-ViT_tutorial.ipynb
 - A1-Einops_tutorial.ipynb
 - 01-Image_Embedding.ipynb
-- 02-Transformer_Encoder.ipynb
-- 03-Multi_Head_Attention.ipynb
-- 04-Residual_Connection.ipynb
-- 05-MLP_Head.ipynb
-- 06-ViT.ipynb
+- 02-Multi_Head_Attention.ipynb
+- 03-Residual_Connection.ipynb
+- 04-MLP_Head.ipynb
+- 05-Transformer_Encoder.ipynb
 - ViT.py
 
 
@@ -16,10 +15,10 @@
 - [x] ViT_tutorial.ipynb
 - [x] einops_tutorial.ipynb
 - [x] Image_Embedding.ipynb
-- [ ] Transformer_Encoder.ipynb
 - [ ] Multi_Head_Attention.ipynb
 - [ ] Residual_Connection.ipynb
 - [ ] MLP_Head.ipynb
+- [ ] Transformer_Encoder.ipynb
 - [ ] ViT.ipynb
 - [ ] ViT.py
 
