@@ -10,6 +10,8 @@ from torch import nn
 from torch import Tensor
 from PIL import Image
 from torchvision.transforms import Compose, Resize, ToTensor
+from einops import rearrange, reduce, repeat
+from einops.layers.torch import Rearrange, Reduce
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -68,3 +70,41 @@ class Image_Embedding(nn.Module):
         x = torch.cat([batch_class_token, x], dim=1)
 
         return x + self.pos_embedding
+    
+class MultiHeadAttention(nn.Module):
+    def __init__(self, 
+                 embedding_size: int = 768, 
+                 num_heads: int = 8, 
+                 dropout: float = 0):
+        super(MultiHeadAttention, self).__init__()
+        
+        self.embedding_size = embedding_size
+        self.num_heads = num_heads
+        
+        # keys, queries, values
+        self.K = nn.Linear(embedding_size, embedding_size)
+        self.Q = nn.Linear(embedding_size, embedding_size)
+        self.V = nn.Linear(embedding_size, embedding_size)
+
+        # drop out
+        self.att_drop = nn.Dropout(dropout)
+        
+        self.projection = nn.Linear(embedding_size, embedding_size)
+        
+    def forward(self, x : Tensor) -> Tensor:
+        # keys, queries, values
+        keys    = rearrange(self.K(embedded_tensor), "b n (h d) -> b h n d", h=self.num_heads)
+        queries = rearrange(self.Q(embedded_tensor), "b n (h d) -> b h n d", h=self.num_heads)
+        values  = rearrange(self.V(embedded_tensor), "b n (h d) -> b h n d", h=self.num_heads)
+
+        # Attention Score
+        QK = torch.einsum('b h q d, b h k d -> b h q k', queries, keys)
+        scaling = self.embedding_size ** (1/2)
+        attention_score = F.softmax(QK/scaling, dim=-1)
+        representation = torch.einsum('b h p d, b h d v -> b h p v ', attention_score, values)
+
+        # Concat and projection
+        concated = rearrange(representation, "b h p d -> b p (h d)")
+        out = self.projection(concated)
+
+        return out
