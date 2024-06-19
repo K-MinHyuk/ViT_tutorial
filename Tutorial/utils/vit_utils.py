@@ -71,12 +71,12 @@ class Image_Embedding(nn.Module):
 
         return x + self.pos_embedding
     
-class MultiHeadAttention(nn.Module):
+class Multi_Head_Attention(nn.Module):
     def __init__(self, 
                  embedding_size: int = 768, 
                  num_heads: int = 8, 
                  dropout: float = 0):
-        super(MultiHeadAttention, self).__init__()
+        super(Multi_Head_Attention, self).__init__()
         
         self.embedding_size = embedding_size
         self.num_heads = num_heads
@@ -93,9 +93,9 @@ class MultiHeadAttention(nn.Module):
         
     def forward(self, x : Tensor) -> Tensor:
         # keys, queries, values
-        keys    = rearrange(self.K(embedded_tensor), "b n (h d) -> b h n d", h=self.num_heads)
-        queries = rearrange(self.Q(embedded_tensor), "b n (h d) -> b h n d", h=self.num_heads)
-        values  = rearrange(self.V(embedded_tensor), "b n (h d) -> b h n d", h=self.num_heads)
+        keys    = rearrange(self.K(x), "b n (h d) -> b h n d", h=self.num_heads)
+        queries = rearrange(self.Q(x), "b n (h d) -> b h n d", h=self.num_heads)
+        values  = rearrange(self.V(x), "b n (h d) -> b h n d", h=self.num_heads)
 
         # Attention Score
         QK = torch.einsum('b h q d, b h k d -> b h q k', queries, keys)
