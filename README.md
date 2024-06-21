@@ -15,7 +15,7 @@
 - [x] einops_tutorial.ipynb
 - [x] Image_Embedding.ipynb
 - [x] Multi_Head_Attention.ipynb
-- [ ] Transformer_Encoder.ipynb
+- [x] Transformer_Encoder.ipynb
 - [ ] MLP_Head.ipynb
 - [ ] ViT.ipynb
 - [ ] ViT.py
