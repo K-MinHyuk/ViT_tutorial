@@ -21,14 +21,14 @@ class Image_Embedding(nn.Module):
     putout: patch wise embedded vector [Tensor]
     """
     def __init__(self, 
-                image_size: tuple[int, int, int, int], # N, C, H, W
+                image_size: list[int, int, int], # C, H, W
                 patch_size: int,
                 hidden_dim: Optional[int] = None
             ):
         super(Image_Embedding, self).__init__()
 
         self.patch_size = patch_size
-        self.n, self.c, self.h, self.w = image_size
+        self.c, self.h, self.w = image_size
         self.n_h = self.h // self.patch_size
         self.n_w = self.w // self.patch_size
         self.seq_length = self.n_h * self.n_w 
@@ -108,3 +108,68 @@ class Multi_Head_Attention(nn.Module):
         out = self.projection(concated)
 
         return out
+    
+class ResidualConnection(nn.Module):
+    def __init__(self, layer):
+        super().__init__()
+        self.layer = layer
+    
+    def forward(self, x):
+        temp_x = x
+        x = self.layer(x)
+        return x + temp_x
+    
+class FeedForward(nn.Module):
+    def __init__(self, 
+                 embedding_size: int,
+                 expansion: int = 4, 
+                 dropout: float = 0.):
+        super(FeedForward, self).__init__()
+
+        self.ff_layer = nn.Sequential(
+            nn.Linear(embedding_size, expansion * embedding_size),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(expansion * embedding_size, embedding_size),
+        )
+    def forward(self, x):
+        return self.ff_layer(x)
+    
+class Transformer_Block(nn.Module):
+    def __init__(self, 
+                 embedding_size: int = 768,
+                 dropout: float = 0.,
+                 forward_expansion: int = 4,
+                 forward_dropout: float = 0,
+                 **kwargs):
+        super(Transformer_Block, self).__init__()
+        self.norm_mha = nn.Sequential(
+            ResidualConnection(
+                nn.Sequential(
+                    nn.LayerNorm(embedding_size),
+                    Multi_Head_Attention(embedding_size, **kwargs),
+                    nn.Dropout(dropout)
+                    )
+                )
+            )
+        self.norm_ff = nn.Sequential(
+            ResidualConnection(
+                nn.Sequential(
+                    nn.LayerNorm(embedding_size),
+                    FeedForward(embedding_size, forward_expansion, forward_dropout),
+                    nn.Dropout(dropout)
+                )
+            )
+        )
+
+    def forward(self, x):
+        x = self.norm_mha(x)
+        return self.norm_ff(x)
+    
+class TransformerEncoder(nn.Module):
+    def __init__(self, depth: int = 12, **kwargs):
+        super(TransformerEncoder, self).__init__()
+        self.multi_encoder_layer = nn.Sequential(*[Transformer_Block(**kwargs) for _ in range(depth)])    
+        
+    def forward(self, x):
+        return self.multi_encoder_layer(x)
