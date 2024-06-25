@@ -173,3 +173,47 @@ class TransformerEncoder(nn.Module):
         
     def forward(self, x):
         return self.multi_encoder_layer(x)
+
+
+class MLP_Head(nn.Module):
+    def __init__(self, embedding_size: int = 768, n_classes: int = 1000, reduce_type: Optional[str] = None):
+        super(MLP_Head, self).__init__()
+        self.reduce_type = reduce_type
+        self.r_layer = self.reducelayer()
+        self.layers = nn.Sequential(
+                nn.LayerNorm(embedding_size), 
+                nn.Linear(embedding_size, n_classes)
+                )
+        
+    def reducelayer(self):
+        if self.reduce_type == None:
+            return lambda x: x[:, 0]
+        elif self.reduce_type == 'mean':
+            return Reduce('b p e -> b e', reduction='mean')
+    
+    def forward(self, x):
+        x = self.r_layer(x)
+        return self.layers(x)
+    
+
+class ViT(nn.Module):
+    def __init__(self,     
+                img_size: list[int, int, int],
+                patch_size: int = 16,
+                embedding_size: int = 768,
+                depth: int = 12,
+                n_classes: int = 1000,
+                reduce_type: Optional[str] = None,
+                **kwargs):
+        super(ViT, self).__init__()
+        
+        self.layers = nn.Sequential(
+            Image_Embedding(img_size, patch_size, embedding_size),
+            TransformerEncoder(depth, **kwargs),
+            MLP_Head(n_classes=n_classes, reduce_type=reduce_type),
+            torch.nn.Softmax(dim=-1)
+        )
+        
+    def forward(self, x):
+        return self.layers(x)
+

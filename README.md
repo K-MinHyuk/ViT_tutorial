@@ -5,7 +5,8 @@
 - 01-Image_Embedding.ipynb
 - 02-Multi_Head_Attention.ipynb
 - 03-Transformer_Encoder.ipynb
-- 04-MLP_Head.ipynb
+- 04-ViT.ipynb
+- 04-ViT Train and Inference.ipynb
 - ViT.py
 
 
@@ -16,9 +17,9 @@
 - [x] Image_Embedding.ipynb
 - [x] Multi_Head_Attention.ipynb
 - [x] Transformer_Encoder.ipynb
-- [ ] MLP_Head.ipynb
-- [ ] ViT.ipynb
-- [ ] ViT.py
+- [x] ViT.ipynb
+- [ ] ViT Train and Inference.ipynb
+- [ ] ViT python build
 
 
 
