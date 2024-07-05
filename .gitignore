@@ -1,3 +1,5 @@
 ## ViT_tutorial Ignore File ##
 
 Tutorial/data/**
+
+Tutorial/model_cifar.pt

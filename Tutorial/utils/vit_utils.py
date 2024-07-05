@@ -169,7 +169,7 @@ class Transformer_Block(nn.Module):
 class TransformerEncoder(nn.Module):
     def __init__(self, depth: int = 12, **kwargs):
         super(TransformerEncoder, self).__init__()
-        self.multi_encoder_layer = nn.Sequential(*[Transformer_Block(**kwargs) for _ in range(depth)])    
+        self.multi_encoder_layer = nn.Sequential(*[Transformer_Block(**kwargs) for _ in range(depth)])
         
     def forward(self, x):
         return self.multi_encoder_layer(x)
