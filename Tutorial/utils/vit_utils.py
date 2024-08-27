@@ -23,7 +23,7 @@ class Image_Embedding(nn.Module):
     def __init__(self, 
                 image_size: list[int, int, int], # C, H, W
                 patch_size: int,
-                hidden_dim: Optional[int] = None
+                embedding_size: Optional[int] = None
             ):
         super(Image_Embedding, self).__init__()
 
@@ -33,23 +33,23 @@ class Image_Embedding(nn.Module):
         self.n_w = self.w // self.patch_size
         self.seq_length = self.n_h * self.n_w 
 
-        if hidden_dim == None:
-                self.hidden_dim = self.patch_size * self.patch_size * self.c
+        if embedding_size == None:
+                self.embedding_size = self.patch_size * self.patch_size * self.c
         else:
-             self.hidden_dim = hidden_dim
+             self.embedding_size = embedding_size
 
-        self.class_token = nn.Parameter(torch.zeros(1, 1, self.hidden_dim))
-        self.pos_embedding = nn.Parameter(torch.empty(1, self.seq_length+1, self.hidden_dim).normal_(std=0.02))  # from BERT
+        self.class_token = nn.Parameter(torch.zeros(1, 1, self.embedding_size))
+        self.pos_embedding = nn.Parameter(torch.empty(1, self.seq_length+1, self.embedding_size).normal_(std=0.02))  # from BERT
 
         self.conv_proj = nn.Sequential(
                         nn.LayerNorm(
                                 [self.c, self.h, self.w]
                         ),
                         nn.Conv2d(
-                        in_channels=3, out_channels=self.hidden_dim, kernel_size=patch_size, stride=patch_size
+                        in_channels=3, out_channels=self.embedding_size, kernel_size=patch_size, stride=patch_size
                         ),
                         nn.LayerNorm(
-                                [self.hidden_dim, self.n_h, self.n_w]
+                                [self.embedding_size, self.n_h, self.n_w]
                         )
                 )
         
@@ -61,7 +61,7 @@ class Image_Embedding(nn.Module):
         # (n, c, h, w) -> (n, hidden_dim, n_h, n_w)
         x = self.conv_proj(x)
         # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
-        x = x.reshape(n, self.hidden_dim, self.n_h * self.n_w)
+        x = x.reshape(n, self.embedding_size, self.n_h * self.n_w)
         # (n, hidden_dim, (n_h * n_w)) -> (n, (n_h * n_w), hidden_dim)
         x = x.permute(0, 2, 1)        
         
@@ -137,6 +137,7 @@ class FeedForward(nn.Module):
     
 class Transformer_Block(nn.Module):
     def __init__(self, 
+                 patch_size: int = 12,
                  embedding_size: int = 768,
                  dropout: float = 0.,
                  forward_expansion: int = 4,
@@ -167,9 +168,9 @@ class Transformer_Block(nn.Module):
         return self.norm_ff(x)
     
 class TransformerEncoder(nn.Module):
-    def __init__(self, depth: int = 12, **kwargs):
+    def __init__(self, patch_size, embedding_size, depth: int = 12, **kwargs):
         super(TransformerEncoder, self).__init__()
-        self.multi_encoder_layer = nn.Sequential(*[Transformer_Block(**kwargs) for _ in range(depth)])
+        self.multi_encoder_layer = nn.Sequential(*[Transformer_Block(patch_size, embedding_size, **kwargs) for _ in range(depth)])
         
     def forward(self, x):
         return self.multi_encoder_layer(x)
@@ -209,7 +210,7 @@ class ViT(nn.Module):
         
         self.layers = nn.Sequential(
             Image_Embedding(img_size, patch_size, embedding_size),
-            TransformerEncoder(depth, **kwargs),
+            TransformerEncoder(patch_size, embedding_size, depth, **kwargs),
             MLP_Head(n_classes=n_classes, reduce_type=reduce_type),
             torch.nn.Softmax(dim=-1)
         )
