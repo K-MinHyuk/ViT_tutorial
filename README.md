@@ -18,10 +18,10 @@
 - [x] Multi_Head_Attention.ipynb
 - [x] Transformer_Encoder.ipynb
 - [x] ViT.ipynb
-- [ ] ViT Train and Inference.ipynb
+- [x] ViT Train and Inference.ipynb
 - [ ] ViT python build
-
-# tt
+- [ ] train_DDP
+- [ ] write README for train and train with DDP in CLI setting 
 
 
 
